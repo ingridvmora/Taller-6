@@ -14,10 +14,13 @@ import java.io.BufferedReader;
 
 import modelo.Combo;
 import modelo.Ingrediente;
+import modelo.IngredienteRepetidoException;
 import modelo.Pedido;
+import modelo.PedidoExcepcion;
 import modelo.Producto;
 import modelo.ProductoAjustado;
 import modelo.ProductoMenu;
+import modelo.ProductoRepetidoException;
 import modelo.Restaurante;
 
 public class Aplicacion
@@ -25,7 +28,7 @@ public class Aplicacion
 
 	private static Restaurante startRestaurante = new Restaurante();
 
-	public static void main(String[] args) throws IOException
+	public static void main(String[] args) throws IOException, IngredienteRepetidoException, ProductoRepetidoException, PedidoExcepcion
 	{
 
 		String nuestroDirectory = System.getProperty("user.dir");
@@ -52,7 +55,7 @@ public class Aplicacion
 		System.out.println("*********************************************************\n");
 	}
 
-	public void ejecutarOpcion() throws IOException
+	public void ejecutarOpcion() throws IOException, PedidoExcepcion
 	{
 		System.out.println("Iniciando programa...");
 
@@ -78,19 +81,7 @@ public class Aplicacion
 
 					// Para agregar un PRODUCTO
 					if (agregar == 1)
-					{ if (startRestaurante.getPedidoEnCurso() != null) {
-                        Producto producto = productoHash.get(productoElegido);
-
-                        // Verificar si el pedido supera el límite
-                        try {
-                            startRestaurante.agregarProductoAlPedido(producto);
-                        } catch (LimitePedidoExcedidoException e) {
-                            System.err.println("Error: " + e.getMessage());
-                        }
-                    } else {
-                        System.err.println("Error: No hay un pedido en curso. Inicia un pedido primero.");
-                    }
-                }
+					{ 
 						System.out.println("\n******************** LISTA PRODUCTOS ********************\n");
 						Map<String, Producto> productoHash = new HashMap<>();
 
