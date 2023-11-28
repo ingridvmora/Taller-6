@@ -92,7 +92,7 @@ public class Aplicacion
 						}
 
 						String productoElegido = input("\nIngrese el número del producto que desea agregar"); // Producto elegido
- 						String deseaAgregaroQuitar = input("\n¿Desea agregar o quitar un ingrediente? (Y o N)");
+ 						String deseaAgregaroQuitar = input("\n¿Desea agregar o quitar un ingrediente? (Y o N)").toUpperCase();
 
 						// Para agregar un PRODUCTO AJUSTADO
 						if (deseaAgregaroQuitar.equals("Y"))

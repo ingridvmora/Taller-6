@@ -46,7 +46,7 @@ public class Pedido
 		
 		
 		
-		Pedido.numeroPedidos ++;
+		Pedido.setNumeroPedidos(Pedido.getNumeroPedidos() + 1);
 	}
 	
 	
@@ -118,6 +118,16 @@ public class Pedido
 			myWriter.write(this.generarTextoFactura());
 			myWriter.close();
 		}
+	}
+
+
+	public static int getNumeroPedidos() {
+		return numeroPedidos;
+	}
+
+
+	public static void setNumeroPedidos(int numeroPedidos) {
+		Pedido.numeroPedidos = numeroPedidos;
 	}
 
 }

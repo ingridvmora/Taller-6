@@ -1,16 +1,10 @@
 package modelo;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-
-
 import java.io.BufferedReader;
 
 public class Restaurante
@@ -46,7 +40,7 @@ public class Restaurante
 		File newFile = new File(nuestroDirectory + this.getPedidoEnCurso().getIdPedido() + ".txt");
 		this.getPedidoEnCurso().guardarFactura(newFile);
 		
-		this.pedidos.add(pedidoEnCurso);
+		Restaurante.pedidos.add(pedidoEnCurso);
 		this.pedidoEnCurso = null; // Se cierra el pedido.
 	}
 	
@@ -81,7 +75,7 @@ public class Restaurante
 	}
 	
 	
-	public void cargarInformacionRestaurante(File archivoIngredientes, File archivoMenu, File archivoCombos) throws IOException
+	public void cargarInformacionRestaurante(File archivoIngredientes, File archivoMenu, File archivoCombos) throws IOException, IngredienteRepetidoException, ProductoRepetidoException
 	{
 		cargarIngredientes(archivoIngredientes);
 		cargarMenu(archivoMenu);
@@ -89,57 +83,60 @@ public class Restaurante
 	}
 	
 	
-	private void cargarIngredientes(File archivoIngredientes) throws IOException 
-	{
-		//ingredientes.txt
-		archivoIngredientes.createNewFile();
-		Reader targetReader = new FileReader(archivoIngredientes);
-		
-		BufferedReader br = new BufferedReader(targetReader);
-		
-		String linea = br.readLine();
-		
-		while (linea != null)
-		{
-			// Separar los valores que estaban en una line.
-			String[] parteStrings = linea.split(";");
-			
-			String nombreIngrediente = parteStrings[0];
-			int precioIngrediente = Integer.parseInt(parteStrings[1]);
-			
-			Ingrediente nuevoIngrediente = new Ingrediente(nombreIngrediente, precioIngrediente);
-			
-			this.ingredientes.add(nuevoIngrediente);
-			linea = br.readLine();
-		}
-		
-	}
+	 private void cargarIngredientes(File archivoIngredientes) throws IOException, IngredienteRepetidoException {
+	        archivoIngredientes.createNewFile();
+	        Reader targetReader = new FileReader(archivoIngredientes);
+
+	        try (BufferedReader br = new BufferedReader(targetReader)) {
+	            String linea = br.readLine();
+
+	            while (linea != null) {
+	                String[] parteStrings = linea.split(";");
+
+	                String nombreIngrediente = parteStrings[0];
+	                int precioIngrediente = Integer.parseInt(parteStrings[1]);
+
+	                Ingrediente nuevoIngrediente = new Ingrediente(nombreIngrediente, precioIngrediente);
+
+	                if (ingredientes.contains(nuevoIngrediente)) {
+	                    throw new IngredienteRepetidoException(nombreIngrediente);
+	                }
+
+	                this.ingredientes.add(nuevoIngrediente);
+	                linea = br.readLine();
+	            }
+	        } catch (NumberFormatException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	
 	
-	private void cargarMenu(File archivoMenu) throws IOException
-	{
-		//menu.txt
-		archivoMenu.createNewFile();
-		Reader targetReader = new FileReader(archivoMenu);
-		
-		BufferedReader br = new BufferedReader(targetReader);
-		
-		String linea = br.readLine();
-		
-		while(linea != null) 
-		{
-			// Separar los valores que estaban en una línea.
-			String[] parteStrings = linea.split(";");
-			
-			String nombreProducto = parteStrings[0];
-			int precioProducto = Integer.parseInt(parteStrings[1]);
-			
-			ProductoMenu nuevoProducto = new ProductoMenu(nombreProducto, precioProducto);
-			
-			this.menuBase.add(nuevoProducto);
-			linea = br.readLine();
-		}
-	}
+	 private void cargarMenu(File archivoMenu) throws IOException, ProductoRepetidoException {
+	        archivoMenu.createNewFile();
+	        Reader targetReader = new FileReader(archivoMenu);
+
+	        try (BufferedReader br = new BufferedReader(targetReader)) {
+	            String linea = br.readLine();
+
+	            while (linea != null) {
+	                String[] parteStrings = linea.split(";");
+
+	                String nombreProducto = parteStrings[0];
+	                int precioProducto = Integer.parseInt(parteStrings[1]);
+
+	                ProductoMenu nuevoProducto = new ProductoMenu(nombreProducto, precioProducto);
+
+	                if (menuBase.contains(nuevoProducto)) {
+	                    throw new ProductoRepetidoException(nombreProducto);
+	                }
+
+	                this.menuBase.add(nuevoProducto);
+	                linea = br.readLine();
+	            }
+	        } catch (NumberFormatException e) {
+	            e.printStackTrace();
+	        }
+	    }
 	
 	
 	private void cargarCombos(File archivoCombos) throws IOException
@@ -148,42 +145,45 @@ public class Restaurante
 		archivoCombos.createNewFile();
 		Reader targetReader = new FileReader(archivoCombos);
 		
-		BufferedReader br = new BufferedReader(targetReader);
-		
-		String linea = br.readLine();
-		
-		while (linea != null)
-		{
-			// Separar los valors que están en linea separados por ;
-			String[] parteStrings = linea.split(";");
+		try (BufferedReader br = new BufferedReader(targetReader)) {
+			String linea = br.readLine();
 			
-			String nombreComboString = parteStrings[0];
-			
-			double descuento = Double.parseDouble((parteStrings[1]).split("%")[0])/100;
-			
-			Combo nuevoCombo = new Combo(nombreComboString, descuento);
-			
-			int iteracion = 0; // Para saber cuándo empiezan los productos.
-			for (String indice: parteStrings)
+			while (linea != null)
 			{
-				if (iteracion >= 2)
-				{	
-					for (Producto p: this.menuBase)
-					{
-						
-						if (p.getNombre().equals(indice)) // Si el nombre del producto es igual al String indice
+				// Separar los valors que están en linea separados por ;
+				String[] parteStrings = linea.split(";");
+				
+				String nombreComboString = parteStrings[0];
+				
+				double descuento = Double.parseDouble((parteStrings[1]).split("%")[0])/100;
+				
+				Combo nuevoCombo = new Combo(nombreComboString, descuento);
+				
+				int iteracion = 0; // Para saber cuándo empiezan los productos.
+				for (String indice: parteStrings)
+				{
+					if (iteracion >= 2)
+					{	
+						for (Producto p: this.menuBase)
 						{
-							nuevoCombo.agregarItemACombo(p);
+							
+							if (p.getNombre().equals(indice)) // Si el nombre del producto es igual al String indice
+							{
+								nuevoCombo.agregarItemACombo(p);
+							}
 						}
 					}
+					iteracion ++;
 				}
-				iteracion ++;
+				
+				
+				this.combos.add(nuevoCombo);
+				
+				linea = br.readLine();
 			}
-			
-			
-			this.combos.add(nuevoCombo);
-			
-			linea = br.readLine();
+		} catch (NumberFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 	}
