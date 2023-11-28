@@ -49,6 +49,17 @@ public class Restaurante
 	{
 		return this.pedidoEnCurso;
 	}
+	public void agregarProductoAlPedido(Producto producto) {
+        try {
+            if (pedidoEnCurso != null) {
+                pedidoEnCurso.agregarProducto(producto);
+            } else {
+                System.err.println("Error: No hay un pedido en curso. Inicia un pedido primero.");
+            }
+        } catch (PedidoExcepcion e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
 	
 	
 	public ArrayList<Producto> getMenuBase()
@@ -111,80 +122,96 @@ public class Restaurante
 	    }
 	
 	
-	 private void cargarMenu(File archivoMenu) throws IOException, ProductoRepetidoException {
-	        archivoMenu.createNewFile();
-	        Reader targetReader = new FileReader(archivoMenu);
+	 private void cargarMenu(File archivoMenu) throws IOException {
+		    archivoMenu.createNewFile();
+		    Reader targetReader = new FileReader(archivoMenu);
 
-	        try (BufferedReader br = new BufferedReader(targetReader)) {
-	            String linea = br.readLine();
+		    try (BufferedReader br = new BufferedReader(targetReader)) {
+		        String linea = br.readLine();
 
-	            while (linea != null) {
-	                String[] parteStrings = linea.split(";");
+		        while (linea != null) {
+		            String[] parteStrings = linea.split(";");
 
-	                String nombreProducto = parteStrings[0];
-	                int precioProducto = Integer.parseInt(parteStrings[1]);
+		            if (parteStrings.length < 2) {
+		                // Imprimir mensaje de error y continuar con la siguiente línea
+		                System.err.println("Error: Formato inválido para el menú: " + linea);
+		                linea = br.readLine();
+		                continue;
+		            }
 
-	                ProductoMenu nuevoProducto = new ProductoMenu(nombreProducto, precioProducto);
+		            String nombreProducto = parteStrings[0];
+		            try {
+		                int precioProducto = Integer.parseInt(parteStrings[1]);
 
-	                if (menuBase.contains(nuevoProducto)) {
-	                    throw new ProductoRepetidoException(nombreProducto);
-	                }
+		                ProductoMenu nuevoProducto = new ProductoMenu(nombreProducto, precioProducto);
 
-	                this.menuBase.add(nuevoProducto);
-	                linea = br.readLine();
-	            }
-	        } catch (NumberFormatException e) {
-	            e.printStackTrace();
-	        }
-	    }
-	
-	
-	private void cargarCombos(File archivoCombos) throws IOException
-	{
-		//combos.txt
-		archivoCombos.createNewFile();
-		Reader targetReader = new FileReader(archivoCombos);
-		
-		try (BufferedReader br = new BufferedReader(targetReader)) {
-			String linea = br.readLine();
-			
-			while (linea != null)
-			{
-				// Separar los valors que están en linea separados por ;
-				String[] parteStrings = linea.split(";");
-				
-				String nombreComboString = parteStrings[0];
-				
-				double descuento = Double.parseDouble((parteStrings[1]).split("%")[0])/100;
-				
-				Combo nuevoCombo = new Combo(nombreComboString, descuento);
-				
-				int iteracion = 0; // Para saber cuándo empiezan los productos.
-				for (String indice: parteStrings)
-				{
-					if (iteracion >= 2)
-					{	
-						for (Producto p: this.menuBase)
-						{
-							
-							if (p.getNombre().equals(indice)) // Si el nombre del producto es igual al String indice
-							{
-								nuevoCombo.agregarItemACombo(p);
-							}
-						}
-					}
-					iteracion ++;
-				}
-				
-				
-				this.combos.add(nuevoCombo);
-				
-				linea = br.readLine();
-			}
-		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		                if (menuBase.contains(nuevoProducto)) {
+		                    // Imprimir mensaje de error y continuar con la siguiente línea
+		                    System.err.println("Error: Producto repetido en el menú: " + nombreProducto);
+		                    linea = br.readLine();
+		                    continue;
+		                }
+
+		                this.menuBase.add(nuevoProducto);
+		            } catch (NumberFormatException e) {
+		                // Imprimir mensaje de error y continuar con la siguiente línea
+		                System.err.println("Error: Formato inválido para el menú: " + linea);
+		            }
+
+		            linea = br.readLine();
+		        }
+		    }
 		}
+
+	
+	
+	 private void cargarCombos(File archivoCombos) throws IOException {
+		    archivoCombos.createNewFile();
+		    Reader targetReader = new FileReader(archivoCombos);
+
+		    try (BufferedReader br = new BufferedReader(targetReader)) {
+		        String linea = br.readLine();
+
+		        while (linea != null) {
+		            String[] parteStrings = linea.split(";");
+
+		            if (parteStrings.length < 2) {
+		                // Imprimir mensaje de error y continuar con la siguiente línea
+		                System.err.println("Error: Formato inválido para el combo: " + linea);
+		                linea = br.readLine();
+		                continue;
+		            }
+
+		            String nombreComboString = parteStrings[0];
+
+		            try {
+		                double descuento = Double.parseDouble((parteStrings[1]).split("%")[0]) / 100;
+
+		                Combo nuevoCombo = new Combo(nombreComboString, descuento);
+
+		                int iteracion = 0; // Para saber cuándo empiezan los productos.
+		                for (String indice : parteStrings) {
+		                    if (iteracion >= 2) {
+		                        for (Producto p : this.menuBase) {
+		                            if (p.getNombre().equals(indice)) {
+		                                nuevoCombo.agregarItemACombo(p);
+		                            }
+		                        }
+		                    }
+		                    iteracion++;
+		                }
+
+		                this.combos.add(nuevoCombo);
+		            } catch (NumberFormatException e) {
+		                // Imprimir mensaje de error y continuar con la siguiente línea
+		                System.err.println("Error: Formato inválido para el combo: " + linea);
+		            }
+
+		            linea = br.readLine();
+		        }
+		    }
+		}
+
 		
-	}
+	
 }

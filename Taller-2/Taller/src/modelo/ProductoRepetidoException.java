@@ -1,11 +1,6 @@
-/**
- * 
- */
+
 package modelo;
 
-/**
- * 
- */
 public class ProductoRepetidoException extends HamburguesaException {
     /**
 	 * 

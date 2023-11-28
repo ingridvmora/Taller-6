@@ -22,6 +22,7 @@ public class Pedido
 	private ArrayList<Producto> itemsPedido = new ArrayList<>();
 	
 	private static ArrayList<Integer> idsPedidos =  new ArrayList<>();
+	 private static final int LIMITE_PEDIDO = 150000;
 	
 	// Constructor
 	
@@ -58,10 +59,21 @@ public class Pedido
 	}
 	
 	
-	public void agregarProducto(Producto nuevoItem)
-	{
-		this.itemsPedido.add(nuevoItem);
-	}
+	public void agregarProducto(Producto nuevoItem) throws PedidoExcepcion {
+        if (calcularTotal() + nuevoItem.getPrecio() > LIMITE_PEDIDO) {
+            throw new PedidoExcepcion("El pedido no puede superar el límite de 150,000 pesos.");
+        }
+
+        this.itemsPedido.add(nuevoItem);
+    }
+	
+	private int calcularTotal() {
+        int total = 0;
+        for (Producto p : itemsPedido) {
+            total += p.getPrecio();
+        }
+        return total;
+    }
 	
 	
 	private int getPrecioNetoPedido()

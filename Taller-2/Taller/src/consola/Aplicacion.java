@@ -78,7 +78,19 @@ public class Aplicacion
 
 					// Para agregar un PRODUCTO
 					if (agregar == 1)
-					{
+					{ if (startRestaurante.getPedidoEnCurso() != null) {
+                        Producto producto = productoHash.get(productoElegido);
+
+                        // Verificar si el pedido supera el límite
+                        try {
+                            startRestaurante.agregarProductoAlPedido(producto);
+                        } catch (LimitePedidoExcedidoException e) {
+                            System.err.println("Error: " + e.getMessage());
+                        }
+                    } else {
+                        System.err.println("Error: No hay un pedido en curso. Inicia un pedido primero.");
+                    }
+                }
 						System.out.println("\n******************** LISTA PRODUCTOS ********************\n");
 						Map<String, Producto> productoHash = new HashMap<>();
 
